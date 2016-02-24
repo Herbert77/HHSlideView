@@ -11,7 +11,7 @@ Pod::Spec.new do |s|
   s.author       = { "Herbert Hu" => "herbert7789@hotmail.com" }
   s.platform     = :ios, "8.0"
   s.source       = { :git => "https://github.com/Herbert77/HHSlideView.git", :tag => "0.0.1" }
-  s.source_files = 'HHSlideView/*'
+  s.source_files = 'HHSlideView/HHSlideView/*'
   s.framework    = "Foundation"
   s.requires_arc = true
 end
