@@ -8,13 +8,15 @@
 
 #import "HHSlideView.h"
 
-#define Slider_Height                   6
+#define Slider_Height                   5
 #define SlideBar_Height                 50
 #define SlideView_Height                50
 #define SliderThanSliderView_WidthRatio 0.9
 #define Slider_DefaultColor             [UIColor colorWithRed:148/255.0 green:214/255.0 blue:218/255.0 alpha:1.0]
 #define SlideBar_DefaultColor           [UIColor colorWithRed:114/255.0 green:119/255.0 blue:123/255.0 alpha:1.0]
 #define SlideView_DefaultColor          [UIColor colorWithRed:114/255.0 green:119/255.0 blue:123/255.0 alpha:1.0]
+#define Title_DefaultColor              [UIColor colorWithRed:0.65 green:0.73 blue:0.75 alpha:1]
+
 #define SCREEN_WIDTH                    ([UIScreen mainScreen].bounds.size.width)
 #define SCREEN_HEIGHT                   ([UIScreen mainScreen].bounds.size.height)
 
@@ -92,8 +94,6 @@
     
     self.namesOfSlideItems = [self.delegate namesOfSlideItemsInSlideView:self];
     self.numberOfSlideItems = [self.delegate numberOfSlideItemsInSlideView:self];
-    
-    
 }
 
 - (void)addSubviews {
@@ -176,7 +176,7 @@
     UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
     [button setFrame:rect];
     [button setTag:tag];
-    [button setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+    [button setTitleColor:Title_DefaultColor forState:UIControlStateNormal];
     [button setTitle:title forState:UIControlStateNormal];
     [button.titleLabel setFont:[UIFont systemFontOfSize:16.f]];
     [button.titleLabel setTextAlignment:NSTextAlignmentCenter];
@@ -225,10 +225,10 @@
 //    NSLog(@"比值 %f", offset.x/SCREEN_WIDTH);
     
     
-    // 未被选中的标题重置为白色
+    // 未被选中的标题重置为指定颜色 Title_DefaultColor
     for (UIButton *button in _buttonsArray) {
         
-        [button setTitleColor:[UIColor colorWithRed:236/255.0 green:240/255.0 blue:241/255.0 alpha:1.0] forState:UIControlStateNormal];
+        [button setTitleColor:Title_DefaultColor forState:UIControlStateNormal];
     }
     
     // 高亮滑块最接近的按钮的文本
@@ -253,13 +253,13 @@
 - (void)buttonClicked:(UIButton *)button {
     
     // 未被选中的标题重置为白色
-    for (UIButton *button in _buttonsArray) {
-        
-        [button setTitleColor:[UIColor colorWithRed:236/255.0 green:240/255.0 blue:241/255.0 alpha:1.0] forState:UIControlStateNormal];
-    }
+//    for (UIButton *button in _buttonsArray) {
+//        
+//        [button setTitleColor:[UIColor colorWithRed:236/255.0 green:240/255.0 blue:241/255.0 alpha:1.0] forState:UIControlStateNormal];
+//    }
     
     // 被选中的项的标题高亮
-    [button setTitleColor:[_slider backgroundColor] forState:UIControlStateNormal];
+//    [button setTitleColor:[_slider backgroundColor] forState:UIControlStateNormal];
     
     [self.delegate slideView:self didSelectItemAtIndex:button.tag];
     [self p_animateSliderWithTag:button.tag];

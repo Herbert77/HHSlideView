@@ -3,7 +3,7 @@ An custom segment control view with flat style.
 
 HHSlideView is a falt view with segment control function. It's easy to be integrated into your project.
 
-![](https://github.com/herbert77/HHSlideView/raw/master/example/HHSlideViewExample/HHSlideViewGif.gif)  
+![image](https://github.com/Herbert77/HHSlideView/tree/master/Example/HHSlideViewDemoGif.gif)  
 Installation
 -----------
 ###CocoaPods

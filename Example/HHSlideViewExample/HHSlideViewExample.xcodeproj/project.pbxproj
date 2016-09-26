@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		E5607E121D98AFDA002356BD /* SubViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = E5607E101D98AFDA002356BD /* SubViewController.m */; };
+		E5607E131D98AFDA002356BD /* SubViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = E5607E111D98AFDA002356BD /* SubViewController.xib */; };
 		E5C93D9D1C7C8C24007A94CB /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = E5C93D9C1C7C8C24007A94CB /* main.m */; };
 		E5C93DA01C7C8C24007A94CB /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = E5C93D9F1C7C8C24007A94CB /* AppDelegate.m */; };
 		E5C93DA31C7C8C24007A94CB /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = E5C93DA21C7C8C24007A94CB /* ViewController.m */; };
@@ -19,6 +21,9 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		E5607E0F1D98AFDA002356BD /* SubViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SubViewController.h; sourceTree = "<group>"; };
+		E5607E101D98AFDA002356BD /* SubViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SubViewController.m; sourceTree = "<group>"; };
+		E5607E111D98AFDA002356BD /* SubViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = SubViewController.xib; sourceTree = "<group>"; };
 		E5C93D981C7C8C23007A94CB /* HHSlideViewExample.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HHSlideViewExample.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E5C93D9C1C7C8C24007A94CB /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		E5C93D9E1C7C8C24007A94CB /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -72,6 +77,9 @@
 				E5C93D9F1C7C8C24007A94CB /* AppDelegate.m */,
 				E5C93DA11C7C8C24007A94CB /* ViewController.h */,
 				E5C93DA21C7C8C24007A94CB /* ViewController.m */,
+				E5607E0F1D98AFDA002356BD /* SubViewController.h */,
+				E5607E101D98AFDA002356BD /* SubViewController.m */,
+				E5607E111D98AFDA002356BD /* SubViewController.xib */,
 				E5C93DA41C7C8C24007A94CB /* Main.storyboard */,
 				E5C93DA71C7C8C24007A94CB /* Assets.xcassets */,
 				E5C93DA91C7C8C24007A94CB /* LaunchScreen.storyboard */,
@@ -169,6 +177,7 @@
 				E5C93DAB1C7C8C24007A94CB /* LaunchScreen.storyboard in Resources */,
 				E5C93DA81C7C8C24007A94CB /* Assets.xcassets in Resources */,
 				E5C93DA61C7C8C24007A94CB /* Main.storyboard in Resources */,
+				E5607E131D98AFDA002356BD /* SubViewController.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -182,6 +191,7 @@
 				E5C93DB51C7C8C68007A94CB /* HHSlideView.m in Sources */,
 				E5C93DA31C7C8C24007A94CB /* ViewController.m in Sources */,
 				E5C93DA01C7C8C24007A94CB /* AppDelegate.m in Sources */,
+				E5607E121D98AFDA002356BD /* SubViewController.m in Sources */,
 				E5C93D9D1C7C8C24007A94CB /* main.m in Sources */,
 				E5C93DB81C7C8DA5007A94CB /* UIColor+extend.m in Sources */,
 			);
@@ -330,6 +340,7 @@
 				E5C93DB11C7C8C24007A94CB /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
