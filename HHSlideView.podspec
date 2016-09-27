@@ -1,7 +1,7 @@
 
 Pod::Spec.new do |s|
   s.name         = "HHSlideView"
-  s.version      = "0.0.1"
+  s.version      = "1.0.0"
   s.summary      = "An custom segment control view with flat style."
   s.description  = <<-DESC
                    HHSlideView is a falt view with segment control function. It's easy to be integrated into your project.
