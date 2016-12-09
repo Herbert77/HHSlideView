@@ -11,6 +11,7 @@
 #import "UIColor+extend.h"
 #import "SubViewController.h"
 
+
 //#define Pink_Color                    [UIColor colorWithRed:247 / 255.0 green:172 / 255.0 blue:188 / 255.0 alpha:1.0]
 //#define Cyan_Color                    [UIColor colorWithRed:175 / 255.0 green:223 / 255.0 blue:228 / 255.0 alpha:1.0]
 //#define Purple_Color                  [UIColor colorWithRed:199 / 255.0 green:126 / 255.0 blue:181 / 255.0 alpha:1.0]
@@ -57,7 +58,7 @@
 - (NSArray *)childViewControllersInSlideView:(HHSlideView *)slideView {
     
     SubViewController *subVC_1 = [[SubViewController alloc] initWithImage:[UIImage imageNamed:@"embody_chair"]];
-    
+
     SubViewController *subVC_2 = [[SubViewController alloc] initWithImage:[UIImage imageNamed:@"aeron_chair"]];
     
     SubViewController *subVC_3 = [[SubViewController alloc] initWithImage:[UIImage imageNamed:@"mirra2_chair"]];

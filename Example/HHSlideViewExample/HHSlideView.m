@@ -48,6 +48,8 @@
 
 @property (strong, nonatomic) NSMutableArray *buttonsArray;     /**< 所有滑块上的按钮 */
 
+@property (strong, nonatomic) NSArray *childControllersArray;   /**< 持有所有的子控制器（DEBUG） */
+
 @end
 
 @implementation HHSlideView
@@ -161,10 +163,10 @@
     [self addSubview:_contentScrollView];
     
     // add child view's to contentScrollView
-    NSArray *childControllersArray = [self.delegate childViewControllersInSlideView:self];
-    for (UIViewController *vc in childControllersArray) {
+    self.childControllersArray = [self.delegate childViewControllersInSlideView:self];
+    for (UIViewController *vc in self.childControllersArray) {
         
-        NSUInteger index = [childControllersArray indexOfObject:vc];
+        NSUInteger index = [self.childControllersArray indexOfObject:vc];
         [vc.view setFrame:CGRectMake(index * SCREEN_WIDTH, 0, SCREEN_WIDTH, SCREEN_HEIGHT-SlideView_Height)];
         [_contentScrollView addSubview:vc.view];
     }
@@ -271,7 +273,5 @@
     
     [self p_animateSliderToPositionWithOffset:scrollView.contentOffset];
 }
-
-
 
 @end
