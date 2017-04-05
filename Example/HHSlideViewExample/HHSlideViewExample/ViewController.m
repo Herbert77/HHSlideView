@@ -83,4 +83,14 @@
     return [UIColor colorWithRed:0.31 green:0.95 blue:0.71 alpha:1];
 }
 
+//- (UIColor *)colorOfSlideItemsTitle:(HHSlideView *)slideView {
+//    
+//    return [UIColor redColor];
+//}
+//
+//- (UIColor *)colorOfHighlightedSlideItemsTitle:(HHSlideView *)slideView {
+//    
+//    return [UIColor greenColor];
+//}
+
 @end

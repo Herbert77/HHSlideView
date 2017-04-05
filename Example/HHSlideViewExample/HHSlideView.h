@@ -25,6 +25,10 @@
 
 - (UIColor *)colorOfSlideView:(HHSlideView *)slideView;
 
+- (UIColor *)colorOfSlideItemsTitle:(HHSlideView *)slideView;
+
+- (UIColor *)colorOfHighlightedSlideItemsTitle:(HHSlideView *)slideView;
+
 @end
 
 /**
@@ -41,6 +45,10 @@
 @property (strong, nonatomic, readonly) UIColor *colorOfSlider;       /**< 底部滑块的颜色 */
 
 @property (strong, nonatomic, readonly) UIColor *colorOfSlideView;    /**< 视图的整体颜色 */
+
+@property (strong, nonatomic, readonly) UIColor *colorOfSlideItemsTitle;   /**< 单件标题文本默认色 */
+
+@property (strong, nonatomic, readonly) UIColor *colorOfHighlightedSlideItemsTitle;  /**< 单件标题文本高亮色 */
 
 @end
 

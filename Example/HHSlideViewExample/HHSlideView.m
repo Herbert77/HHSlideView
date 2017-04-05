@@ -16,6 +16,7 @@
 #define SlideBar_DefaultColor           [UIColor colorWithRed:114/255.0 green:119/255.0 blue:123/255.0 alpha:1.0]
 #define SlideView_DefaultColor          [UIColor colorWithRed:114/255.0 green:119/255.0 blue:123/255.0 alpha:1.0]
 #define Title_DefaultColor              [UIColor colorWithRed:0.65 green:0.73 blue:0.75 alpha:1]
+#define HighlightedTitle_DefaultColor   [UIColor colorWithRed:0.31 green:0.95 blue:0.71 alpha:1]
 
 #define SCREEN_WIDTH                    ([UIScreen mainScreen].bounds.size.width)
 #define SCREEN_HEIGHT                   ([UIScreen mainScreen].bounds.size.height)
@@ -26,8 +27,10 @@
     
     struct {
         
-        unsigned int DidDefineColorOfSlider     : 1;
-        unsigned int DidDefineColorOfSlideView  : 1;
+        unsigned int DidDefineColorOfSlider                     : 1;
+        unsigned int DidDefineColorOfSlideView                  : 1;
+        unsigned int DidDefineColorOfSlideItemsTitle            : 1;
+        unsigned int DidDefineColorOfHighlightedSlideItemsTitle : 1;
         
     } _delegateFlags;
 }
@@ -39,6 +42,10 @@
 @property (strong, nonatomic) UIColor *colorOfSlider;       /**< 底部滑块的颜色 */
 
 @property (strong, nonatomic) UIColor *colorOfSlideView;    /**< 视图的整体颜色 */
+
+@property (strong, nonatomic) UIColor *colorOfSlideItemsTitle;   /**< 单件标题文本默认色 */
+
+@property (strong, nonatomic) UIColor *colorOfHighlightedSlideItemsTitle;  /**< 单件标题文本高亮色 */
 
 @property (strong, nonatomic) UIView *slideBar;             /**< 深灰色背景视图 */
 
@@ -60,6 +67,8 @@
     _delegate = delegate;
     _delegateFlags.DidDefineColorOfSlider = [delegate respondsToSelector:@selector(colorOfSliderInSlideView:)];
     _delegateFlags.DidDefineColorOfSlideView = [delegate respondsToSelector:@selector(colorOfSlideView:)];
+    _delegateFlags.DidDefineColorOfSlideItemsTitle = [delegate respondsToSelector:@selector(colorOfSlideItemsTitle:)];
+    _delegateFlags.DidDefineColorOfHighlightedSlideItemsTitle = [delegate respondsToSelector:@selector(colorOfHighlightedSlideItemsTitle:)];
 }
 
 #pragma mark - life cycle
@@ -89,6 +98,8 @@
     _namesOfSlideItems = [NSMutableArray new];
     _colorOfSlider = Slider_DefaultColor;
     _colorOfSlideView = SlideView_DefaultColor;
+    _colorOfSlideItemsTitle = Title_DefaultColor;
+    _colorOfHighlightedSlideItemsTitle = HighlightedTitle_DefaultColor;
     _buttonsArray = [NSMutableArray new];
 }
 
@@ -96,6 +107,16 @@
     
     self.namesOfSlideItems = [self.delegate namesOfSlideItemsInSlideView:self];
     self.numberOfSlideItems = [self.delegate numberOfSlideItemsInSlideView:self];
+    
+    if (_delegateFlags.DidDefineColorOfSlideItemsTitle) {
+        
+        self.colorOfSlideItemsTitle = [self.delegate colorOfSlideItemsTitle:self];
+    }
+    
+    if (_delegateFlags.DidDefineColorOfHighlightedSlideItemsTitle) {
+        
+        self.colorOfHighlightedSlideItemsTitle = [self.delegate colorOfHighlightedSlideItemsTitle:self];
+    }
 }
 
 - (void)addSubviews {
@@ -137,7 +158,7 @@
                 _colorOfSlider = [self.delegate colorOfSliderInSlideView:self];
             }
             // [UIColor colorWithRed:255/255.0 green:188/255.0 blue:136/255.0 alpha:1.0]
-            [(UIButton *)[_buttonsArray objectAtIndex:number] setTitleColor:_colorOfSlider forState:UIControlStateNormal];
+            [(UIButton *)[_buttonsArray objectAtIndex:number] setTitleColor:_colorOfHighlightedSlideItemsTitle forState:UIControlStateNormal];
         }
     }
 }
@@ -147,7 +168,7 @@
     CGFloat slideItemWidth = SCREEN_WIDTH / (CGFloat)self.numberOfSlideItems;
     CGFloat sliderWidth = slideItemWidth * SliderThanSliderView_WidthRatio;
     CGFloat position_x = (slideItemWidth - sliderWidth)/2.0;
-    [self.slideBar addSubview:[self p_sliderWithFrame:CGRectMake( position_x, SlideView_Height-Slider_Height, sliderWidth, Slider_Height)]];
+    [self.slideBar addSubview:[self p_sliderWithFrame:CGRectMake(position_x, SlideView_Height-Slider_Height, sliderWidth, Slider_Height)]];
 }
 
 - (void)addContentScrollView {
@@ -178,7 +199,7 @@
     UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
     [button setFrame:rect];
     [button setTag:tag];
-    [button setTitleColor:Title_DefaultColor forState:UIControlStateNormal];
+    [button setTitleColor:_colorOfSlideItemsTitle forState:UIControlStateNormal];
     [button setTitle:title forState:UIControlStateNormal];
     [button.titleLabel setFont:[UIFont systemFontOfSize:16.f]];
     [button.titleLabel setTextAlignment:NSTextAlignmentCenter];
@@ -230,7 +251,7 @@
     // 未被选中的标题重置为指定颜色 Title_DefaultColor
     for (UIButton *button in _buttonsArray) {
         
-        [button setTitleColor:Title_DefaultColor forState:UIControlStateNormal];
+        [button setTitleColor:_colorOfSlideItemsTitle forState:UIControlStateNormal];
     }
     
     // 高亮滑块最接近的按钮的文本
@@ -247,7 +268,7 @@
         buttonTag = (int)ratio;
     }
     
-    [[_buttonsArray objectAtIndex:buttonTag] setTitleColor:[_slider backgroundColor] forState:UIControlStateNormal];
+    [[_buttonsArray objectAtIndex:buttonTag] setTitleColor:_colorOfHighlightedSlideItemsTitle forState:UIControlStateNormal];
     
 }
 
