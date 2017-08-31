@@ -2,60 +2,51 @@
 //  HHSlideView.m
 //  HHSlideView
 //
-//  Created by Herbert Hu on 15/10/16.
-//  Copyright © 2015年 Herbert Hu. All rights reserved.
+//  Created by Herbert Hu on 2017/8/28.
+//  Copyright © 2017年 Herbert Hu. All rights reserved.
 //
 
 #import "HHSlideView.h"
+#import "Masonry.h"
+#import "POP.h"
 
-#define Slider_Height                   5
-#define SlideBar_Height                 50
-#define SlideView_Height                50
-#define SliderThanSliderView_WidthRatio 0.9
-#define Slider_DefaultColor             [UIColor colorWithRed:148/255.0 green:214/255.0 blue:218/255.0 alpha:1.0]
-#define SlideBar_DefaultColor           [UIColor colorWithRed:114/255.0 green:119/255.0 blue:123/255.0 alpha:1.0]
-#define SlideView_DefaultColor          [UIColor colorWithRed:114/255.0 green:119/255.0 blue:123/255.0 alpha:1.0]
+#define Bar_Height      50
+#define Slider_Height   5
+#define Bar_DefaultColor                [UIColor colorWithRed:0.27 green:0.27 blue:0.27 alpha:1.00]
+#define Slider_DefaultColor             [UIColor colorWithRed:0.07 green:1.00 blue:0.58 alpha:1.00]
 #define Title_DefaultColor              [UIColor colorWithRed:0.65 green:0.73 blue:0.75 alpha:1]
 #define HighlightedTitle_DefaultColor   [UIColor colorWithRed:0.31 green:0.95 blue:0.71 alpha:1]
-
-#define SCREEN_WIDTH                    ([UIScreen mainScreen].bounds.size.width)
-#define SCREEN_HEIGHT                   ([UIScreen mainScreen].bounds.size.height)
-
-
 
 @interface HHSlideView () <UIScrollViewDelegate> {
     
     struct {
         
-        unsigned int DidDefineColorOfSlider                     : 1;
-        unsigned int DidDefineColorOfSlideView                  : 1;
-        unsigned int DidDefineColorOfSlideItemsTitle            : 1;
-        unsigned int DidDefineColorOfHighlightedSlideItemsTitle : 1;
+        unsigned int DidDefineColorOfBar                : 1;
+        unsigned int DidDefineColorOfSlider             : 1;
+        unsigned int DidDefineColorOfTitle              : 1;
+        unsigned int DidDefineColorOfHighlightedTitle   : 1;
         
     } _delegateFlags;
 }
 
-@property (assign, nonatomic) NSInteger numberOfSlideItems; /**< 组成单件数量 */
+@property (strong, nonatomic) UIView *bar;
+@property (strong, nonatomic) UIColor *colorOfBar;
 
-@property (strong, nonatomic) NSArray *namesOfSlideItems;   /**< 各个单件的名字 */
+@property (strong, nonatomic) NSArray *itemsArray;
+@property (strong, nonatomic) NSMutableArray *buttonsArray;
 
-@property (strong, nonatomic) UIColor *colorOfSlider;       /**< 底部滑块的颜色 */
+@property (strong, nonatomic) UIView *slider;
+@property (strong, nonatomic) UIColor *colorOfSlider;
 
-@property (strong, nonatomic) UIColor *colorOfSlideView;    /**< 视图的整体颜色 */
+@property (assign, nonatomic) CGFloat itemWidth;
 
-@property (strong, nonatomic) UIColor *colorOfSlideItemsTitle;   /**< 单件标题文本默认色 */
+@property (strong, nonatomic) UIScrollView *scrollView;
+@property (strong, nonatomic) UIView *containerView;
+@property (strong, nonatomic) NSMutableArray *controllerViewsArray;
 
-@property (strong, nonatomic) UIColor *colorOfHighlightedSlideItemsTitle;  /**< 单件标题文本高亮色 */
+@property (strong, nonatomic) NSArray *childControllersArray;
 
-@property (strong, nonatomic) UIView *slideBar;             /**< 深灰色背景视图 */
-
-@property (strong, nonatomic) UIView *slider;               /**< 滑块视图 */
-
-@property (strong, nonatomic) UIScrollView *contentScrollView; /**< 内容视图 */
-
-@property (strong, nonatomic) NSMutableArray *buttonsArray;     /**< 所有滑块上的按钮 */
-
-@property (strong, nonatomic) NSArray *childControllersArray;   /**< 持有所有的子控制器（DEBUG） */
+@property (assign, nonatomic) NSInteger currentIndex;
 
 @end
 
@@ -65,21 +56,36 @@
 - (void)setDelegate:(id<HHSlideViewDelegate>)delegate {
     
     _delegate = delegate;
-    _delegateFlags.DidDefineColorOfSlider = [delegate respondsToSelector:@selector(colorOfSliderInSlideView:)];
-    _delegateFlags.DidDefineColorOfSlideView = [delegate respondsToSelector:@selector(colorOfSlideView:)];
-    _delegateFlags.DidDefineColorOfSlideItemsTitle = [delegate respondsToSelector:@selector(colorOfSlideItemsTitle:)];
-    _delegateFlags.DidDefineColorOfHighlightedSlideItemsTitle = [delegate respondsToSelector:@selector(colorOfHighlightedSlideItemsTitle:)];
+    _delegateFlags.DidDefineColorOfBar = [delegate respondsToSelector:@selector(colorOfBar:)];
+    _delegateFlags.DidDefineColorOfSlider = [delegate respondsToSelector:@selector(colorOfSlider:)];
+    _delegateFlags.DidDefineColorOfTitle = [delegate respondsToSelector:@selector(colorOfTitle:)];
+    _delegateFlags.DidDefineColorOfHighlightedTitle = [delegate respondsToSelector:@selector(colorOfHighlightedTitle:)];
 }
 
 #pragma mark - life cycle
-- (instancetype)initWithFrame:(CGRect)frame {
+- (instancetype)initWithItemsArray:(nonnull NSArray *)itemsArray {
     
-    self = [super initWithFrame:frame];
+    self = [super init];
     
     if (self) {
         
+        _buttonsArray = [NSMutableArray new];
+        _controllerViewsArray = [NSMutableArray new];
+        _currentIndex = 0;
+        
         [self setBackgroundColor:[UIColor grayColor]];
-        [self initData];
+        
+        [self addSubview:self.bar];
+        
+        [self createButtonsWithItemsArray:itemsArray];
+        
+        [self.bar addSubview:self.slider];
+        
+        [self addSubview:self.scrollView];
+        
+        [self.scrollView addSubview:self.containerView];
+        
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleDeviceOrientationDidChange:) name:UIDeviceOrientationDidChangeNotification object:nil];
     }
     
     return self;
@@ -88,211 +94,277 @@
 - (void)layoutSubviews {
     
     [super layoutSubviews];
-    [self configureData];
-    [self addSubviews];
+    
+    [self getParamFromDelegate];
+    
+    [self createControllerViews];
+    
+    [_bar mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.and.right.and.top.equalTo(self);
+        make.height.mas_equalTo(Bar_Height);
+    }];
+    
+    [self layoutButtonsWithButtonsArray:self.buttonsArray];
+    
+    [self layoutSliderWithCurrentIndex:_currentIndex];
+    
+    [self layoutControllerViews];
+    [self layoutScrollView];
 }
 
-- (void)initData {
+#pragma mark - UI Component Getter
+- (UIView *)bar {
     
-    _numberOfSlideItems = 0;
-    _namesOfSlideItems = [NSMutableArray new];
-    _colorOfSlider = Slider_DefaultColor;
-    _colorOfSlideView = SlideView_DefaultColor;
-    _colorOfSlideItemsTitle = Title_DefaultColor;
-    _colorOfHighlightedSlideItemsTitle = HighlightedTitle_DefaultColor;
-    _buttonsArray = [NSMutableArray new];
-}
-
-- (void) configureData {
-    
-    self.namesOfSlideItems = [self.delegate namesOfSlideItemsInSlideView:self];
-    self.numberOfSlideItems = [self.delegate numberOfSlideItemsInSlideView:self];
-    
-    if (_delegateFlags.DidDefineColorOfSlideItemsTitle) {
+    if(!_bar) {
         
-        self.colorOfSlideItemsTitle = [self.delegate colorOfSlideItemsTitle:self];
+        _bar = [UIView new];
+        [_bar setBackgroundColor:Bar_DefaultColor];
     }
-    
-    if (_delegateFlags.DidDefineColorOfHighlightedSlideItemsTitle) {
-        
-        self.colorOfHighlightedSlideItemsTitle = [self.delegate colorOfHighlightedSlideItemsTitle:self];
-    }
+    return _bar;
 }
 
-- (void)addSubviews {
-    
-    [self addSlideBar];
-    [self addButtons];
-    [self addSlider];
-    [self addContentScrollView];
-}
-
-- (void)addSlideBar {
-    
-    if (!_slideBar) {
-        
-        _slideBar = [[UIView alloc] initWithFrame:CGRectMake(0, 0, self.frame.size.width, SlideBar_Height)];
-        [_slideBar setBackgroundColor:SlideBar_DefaultColor];
-        [self addSubview:_slideBar];
-        
-    }
-}
-
-- (void)addButtons {
-    
-    NSInteger numberOfItems = [self.namesOfSlideItems count];
-    CGFloat slideItemWidth = SCREEN_WIDTH / (CGFloat)self.numberOfSlideItems;
-    CGFloat sliderWidth = slideItemWidth * SliderThanSliderView_WidthRatio;
-    CGFloat position_x = (slideItemWidth - sliderWidth)/2.0;
-    
-    for (NSInteger number=0; number < numberOfItems; number++) {
-        
-        [self.slideBar addSubview:[self p_customButtonWithFrame:CGRectMake( position_x+slideItemWidth*number, 5, sliderWidth, 35)
-                                              forTitle:[self.namesOfSlideItems objectAtIndex:number]
-                                               withTag:number]];
-        
-        if (number == 0) {
-            
-            if (_delegateFlags.DidDefineColorOfSlider) {
-                
-                _colorOfSlider = [self.delegate colorOfSliderInSlideView:self];
-            }
-            // [UIColor colorWithRed:255/255.0 green:188/255.0 blue:136/255.0 alpha:1.0]
-            [(UIButton *)[_buttonsArray objectAtIndex:number] setTitleColor:_colorOfHighlightedSlideItemsTitle forState:UIControlStateNormal];
-        }
-    }
-}
-
-- (void)addSlider {
-    
-    CGFloat slideItemWidth = SCREEN_WIDTH / (CGFloat)self.numberOfSlideItems;
-    CGFloat sliderWidth = slideItemWidth * SliderThanSliderView_WidthRatio;
-    CGFloat position_x = (slideItemWidth - sliderWidth)/2.0;
-    [self.slideBar addSubview:[self p_sliderWithFrame:CGRectMake(position_x, SlideView_Height-Slider_Height, sliderWidth, Slider_Height)]];
-}
-
-- (void)addContentScrollView {
-    
-    _contentScrollView = [[UIScrollView alloc] initWithFrame:CGRectMake(0, SlideBar_Height, SCREEN_WIDTH, self.frame.size.height - 50)];
-    _contentScrollView.directionalLockEnabled = YES;
-    _contentScrollView.backgroundColor = [UIColor whiteColor];
-    _contentScrollView.pagingEnabled = YES;
-    _contentScrollView.contentSize = CGSizeMake(_contentScrollView.frame.size.width * _numberOfSlideItems, 0);
-    _contentScrollView.showsHorizontalScrollIndicator = NO;
-    _contentScrollView.delegate = self;
-    _contentScrollView.bounces = NO;
-    [self addSubview:_contentScrollView];
-    
-    // add child view's to contentScrollView
-    self.childControllersArray = [self.delegate childViewControllersInSlideView:self];
-    for (UIViewController *vc in self.childControllersArray) {
-        
-        NSUInteger index = [self.childControllersArray indexOfObject:vc];
-        [vc.view setFrame:CGRectMake(index * SCREEN_WIDTH, 0, SCREEN_WIDTH, SCREEN_HEIGHT-SlideView_Height)];
-        [_contentScrollView addSubview:vc.view];
-    }
-}
-
-#pragma mark - private method
-- (UIButton *)p_customButtonWithFrame:(CGRect)rect forTitle:(NSString *)title withTag:(NSInteger)tag {
+- (UIButton *)button {
     
     UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
-    [button setFrame:rect];
-    [button setTag:tag];
-    [button setTitleColor:_colorOfSlideItemsTitle forState:UIControlStateNormal];
-    [button setTitle:title forState:UIControlStateNormal];
-    [button.titleLabel setFont:[UIFont systemFontOfSize:16.f]];
+    [button setBackgroundColor:[UIColor clearColor]];
+    [button setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
+    [button setTitle:@"" forState:UIControlStateNormal];
+//    [button.titleLabel setFont:[UIFont systemFontOfSize:16.f]];
+    [button.titleLabel setFont:[UIFont fontWithName:@"Avenir-Book" size:17.0]];
     [button.titleLabel setTextAlignment:NSTextAlignmentCenter];
     [button addTarget:self action:@selector(buttonClicked:) forControlEvents:UIControlEventTouchUpInside];
-    
-    [_buttonsArray addObject:button];
-    
     return button;
 }
 
-- (UIView *)p_sliderWithFrame:(CGRect)rect {
+- (UIView *)slider {
     
     if (!_slider) {
         
-        _slider = [[UIView alloc] initWithFrame:rect];
+        _slider = [UIView new];
         [_slider setBackgroundColor:Slider_DefaultColor];
-        
-        if (_delegateFlags.DidDefineColorOfSlider) {
-            
-            [_slider setBackgroundColor:[self.delegate colorOfSliderInSlideView:self]];
-        }
-        
-        if (_delegateFlags.DidDefineColorOfSlideView) {
-            
-            [_slideBar setBackgroundColor:[self.delegate colorOfSlideView:self]];
-        }
     }
-    
     return _slider;
 }
 
-- (void)p_animateSliderWithTag:(NSInteger)tag {
-
-    [_contentScrollView setContentOffset:CGPointMake(SCREEN_WIDTH * tag, 0) animated:YES];
+- (UIScrollView *)scrollView {
+    
+    if (!_scrollView) {
+        
+        _scrollView = [UIScrollView new];
+        _scrollView.directionalLockEnabled = YES;
+        _scrollView.backgroundColor = [UIColor whiteColor];
+        _scrollView.pagingEnabled = YES;
+        //    _scrollView.contentSize = CGSizeMake(_contentScrollView.frame.size.width * _numberOfSlideItems, 0);
+        _scrollView.showsHorizontalScrollIndicator = YES;
+        _scrollView.delegate = self;
+        _scrollView.bounces = NO;
+    }
+    return _scrollView;
 }
 
-- (void)p_animateSliderToPositionWithOffset:(CGPoint)offset {
+- (UIView *)containerView {
     
-    CGFloat slideItemWidth = SCREEN_WIDTH / (CGFloat)self.numberOfSlideItems;
-    CGFloat sliderWidth = slideItemWidth * SliderThanSliderView_WidthRatio;
-    CGFloat position_x = (slideItemWidth - sliderWidth)/2.0;
-    CGRect newFrame = CGRectMake((offset.x/SCREEN_WIDTH)*slideItemWidth+position_x, _slider.frame.origin.y, _slider.frame.size.width, _slider.frame.size.height);
-    [_slider setFrame:newFrame];
-    
-//    NSLog(@"offset.x %f", offset.x);
-//    NSLog(@"比值 %f", offset.x/SCREEN_WIDTH);
-    
-    
-    // 未被选中的标题重置为指定颜色 Title_DefaultColor
-    for (UIButton *button in _buttonsArray) {
+    if(!_containerView) {
         
-        [button setTitleColor:_colorOfSlideItemsTitle forState:UIControlStateNormal];
+        _containerView = [UIView new];
+        [_containerView setBackgroundColor:[UIColor purpleColor]];
     }
-    
-    // 高亮滑块最接近的按钮的文本
-    int buttonTag;
-    float ratio = offset.x/SCREEN_WIDTH;
-    float decimal = ratio - (int)ratio;
-    
-    if (decimal >= 0.5) {
-        
-        buttonTag = (int)ratio + 1;
-    }
-    else {
-        
-        buttonTag = (int)ratio;
-    }
-    
-    [[_buttonsArray objectAtIndex:buttonTag] setTitleColor:_colorOfHighlightedSlideItemsTitle forState:UIControlStateNormal];
-    
+    return _containerView;
 }
 
-#pragma mark - event response
+- (void)createButtonsWithItemsArray:(NSArray *)itemsArray {
+    for (int i=0; i<[itemsArray count]; i++) {
+        
+        UIButton *retButton = [self button];
+        [retButton setTag:i];
+        [retButton setTitleColor:Title_DefaultColor forState:UIControlStateNormal];
+        [retButton setTitle:itemsArray[i] forState:UIControlStateNormal];
+        [self.bar addSubview:retButton];
+        
+        [_buttonsArray addObject:retButton];
+        
+        if (i == 0) {
+            
+            [retButton setTitleColor:HighlightedTitle_DefaultColor forState:UIControlStateNormal];
+        }
+    }
+}
+
+- (void)createControllerViews {
+    
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        
+        self.childControllersArray = [self.dataSource childViewControllersInSlideView:self];
+        for (UIViewController *vc in self.childControllersArray) {
+            
+//            NSUInteger index = [self.childControllersArray indexOfObject:vc];
+            
+            [self.containerView addSubview:vc.view];
+            [_controllerViewsArray addObject:vc.view];
+            
+//            [_contentScrollView addSubview:vc.view];
+        }
+
+        /*
+        for (int i=0; i<4; i++) {
+            
+            UIView *view = [UIView new];
+            
+            CGFloat red = arc4random() % 255 / 255.0;
+            CGFloat green = arc4random() % 255 / 255.0;
+            CGFloat blue = arc4random() % 255 / 255.0;
+            UIColor *color = [UIColor colorWithRed:red green:green blue:blue alpha:1.0];
+            
+            [view setBackgroundColor:color];
+            [view setTag:i];
+            [self.scrollView addSubview:view];
+            
+            [_controllerViewsArray addObject:view];
+        }
+         */
+    });
+}
+
+#pragma mark - Layout methods
+- (void)layoutButtonsWithButtonsArray:(NSMutableArray *)buttonsArray {
+    
+    CGFloat singleWidth = self.bounds.size.width/(CGFloat)[buttonsArray count];
+    
+    for (int j=0; j<[buttonsArray count]; j++) {
+        
+        UIButton *retButton = buttonsArray[j];
+        
+        [retButton mas_updateConstraints:^(MASConstraintMaker *make) {
+            make.top.and.bottom.equalTo(self.bar);
+            make.width.mas_equalTo(singleWidth);
+            make.left.equalTo(self.bar.mas_left).offset(singleWidth*j);
+        }];
+    }
+}
+
+- (void)layoutSliderWithCurrentIndex:(NSInteger)index {
+    
+    _itemWidth = self.bounds.size.width/(CGFloat)[_buttonsArray count];
+    CGFloat sliderWidth = _itemWidth * 0.6;
+    
+//    UIButton *retButton = [_buttonsArray objectAtIndex:index];
+    
+    [_slider mas_updateConstraints:^(MASConstraintMaker *make) {
+        make.bottom.mas_equalTo(self.bar.mas_bottom);
+//        make.centerX.equalTo(retButton.mas_centerX).priorityLow();
+        make.left.mas_equalTo(self.bar).offset(index*_itemWidth+(_itemWidth-sliderWidth)/2.0);
+        make.width.mas_equalTo(sliderWidth);
+        make.height.mas_equalTo(Slider_Height);
+    }];
+}
+
+- (void)layoutScrollView {
+
+    [_scrollView mas_updateConstraints:^(MASConstraintMaker *make) {
+        make.top.mas_equalTo(self.bar.mas_bottom);
+        make.left.and.right.equalTo(self);
+        make.bottom.equalTo(self).offset(-64);
+    }];
+}
+
+- (void)layoutControllerViews {
+
+    [_containerView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.edges.equalTo(_scrollView);
+        make.height.equalTo(_scrollView);
+        make.width.equalTo(_scrollView).multipliedBy([_buttonsArray count]);
+    }];
+    
+    for (int i=0; i<[_buttonsArray count]; i++) {
+        UIView *view = [_controllerViewsArray objectAtIndex:i];
+        
+        CGFloat left = self.bounds.size.width * i;
+        
+        [view mas_updateConstraints:^(MASConstraintMaker *make) {
+            make.top.equalTo(_containerView);
+            make.left.equalTo(_containerView).offset(left);
+            make.width.mas_equalTo(self.bounds.size.width);
+            make.height.equalTo(_containerView);
+        }];
+    }
+}
+
+#pragma mark - From Delegate
+- (void)getParamFromDelegate {
+    
+    if (_delegateFlags.DidDefineColorOfBar) {
+        
+        self.colorOfBar = [self.delegate colorOfBar:self];
+        [self.bar setBackgroundColor:self.colorOfBar];
+    }
+    //
+}
+
+#pragma mark - Button Action 
 - (void)buttonClicked:(UIButton *)button {
     
-    // 未被选中的标题重置为白色
-//    for (UIButton *button in _buttonsArray) {
-//        
-//        [button setTitleColor:[UIColor colorWithRed:236/255.0 green:240/255.0 blue:241/255.0 alpha:1.0] forState:UIControlStateNormal];
-//    }
+    [self layoutIfNeeded];
     
-    // 被选中的项的标题高亮
-//    [button setTitleColor:[_slider backgroundColor] forState:UIControlStateNormal];
-    
-    [self.delegate slideView:self didSelectItemAtIndex:button.tag];
-    [self p_animateSliderWithTag:button.tag];
-    [self.contentScrollView setContentOffset:CGPointMake(button.tag*SCREEN_WIDTH, 0) animated:YES];
+    CGFloat screen_Width = self.bounds.size.width;
+    [_scrollView setContentOffset:CGPointMake(button.tag*screen_Width, 0) animated:YES];
 }
 
-#pragma mark - UIScrollViewDelegate
+#pragma mark - UIScrollView Delegate
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView {
     
-    [self p_animateSliderToPositionWithOffset:scrollView.contentOffset];
+    CGFloat screen_Width = self.bounds.size.width;
+    
+    CGFloat offset_x = scrollView.contentOffset.x;
+    
+    CGFloat result = offset_x/screen_Width;
+    
+    for (int page=0; page<[_buttonsArray count]; page++) {
+        
+        if (page == result) {
+            
+            _currentIndex = page;
+            [self performAniamtionForSliderWithTag:page];
+        }
+    }
 }
+
+#pragma mark - POP Animation For Slider
+- (void)performAniamtionForSliderWithTag:(NSInteger)tag {
+    
+    _itemWidth = self.bounds.size.width/(CGFloat)[_buttonsArray count];
+    
+    POPSpringAnimation *springAnimation = [POPSpringAnimation animationWithPropertyNamed:kPOPLayerPosition];
+    CGPoint point = _slider.center;
+    
+    springAnimation.toValue = [NSValue valueWithCGPoint:CGPointMake(_itemWidth*(tag+0.5), point.y)];
+    springAnimation.springBounciness = 10.0;
+    springAnimation.springSpeed = 20.0;
+    
+    [_slider pop_addAnimation:springAnimation forKey:@"ChangePosition"];
+    
+    for (UIButton *tempButton in _buttonsArray) {
+        
+        if (tempButton.tag == tag) {
+            
+            [tempButton setTitleColor:HighlightedTitle_DefaultColor forState:UIControlStateNormal];
+        }
+        else {
+            
+            [tempButton setTitleColor:Title_DefaultColor forState:UIControlStateNormal];
+        }
+    }
+}
+
+#pragma mark - Adapt Interface Rotation
+- (void)handleDeviceOrientationDidChange:(UIInterfaceOrientation)interfaceOrientation {
+    
+    CGFloat width = self.bounds.size.width;
+    
+    NSLog(@"(%f, 0)", _currentIndex*width);
+    // revise scrollview's contentOffset
+    [_scrollView setContentOffset:CGPointMake(_currentIndex*width, 0) animated:NO];
+}
+
 
 @end

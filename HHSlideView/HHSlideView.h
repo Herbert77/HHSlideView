@@ -2,54 +2,38 @@
 //  HHSlideView.h
 //  HHSlideView
 //
-//  Created by Herbert Hu on 15/10/16.
-//  Copyright © 2015年 Herbert Hu. All rights reserved.
+//  Created by Herbert Hu on 2017/8/28.
+//  Copyright © 2017年 Herbert Hu. All rights reserved.
 //
 
 #import <UIKit/UIKit.h>
 
+NS_ASSUME_NONNULL_BEGIN
+
 @class HHSlideView;
 @protocol HHSlideViewDelegate <NSObject>
 
-@required
-- (NSInteger)numberOfSlideItemsInSlideView:(HHSlideView *)slideView;
-
-- (NSArray *)namesOfSlideItemsInSlideView:(HHSlideView *)slideView;
-
-- (NSArray *)childViewControllersInSlideView:(HHSlideView *)slideView; /**< 分段选择视图的子视图控制器 */
-
-- (void)slideView:(HHSlideView *)slideView didSelectItemAtIndex:(NSInteger)index;
-
 @optional
-- (UIColor *)colorOfSliderInSlideView:(HHSlideView *)slideView;
+- (UIColor *)colorOfBar:(HHSlideView *)slideView;
+- (UIColor *)colorOfSlider:(HHSlideView *)slideView;
+- (UIColor *)colorOfTitle:(HHSlideView *)slideView;
+- (UIColor *)colorOfHighlightedTitle:(HHSlideView *)slideView;
+@end
 
-- (UIColor *)colorOfSlideView:(HHSlideView *)slideView;
+@protocol HHSlideViewDataSource <NSObject>
 
-- (UIColor *)colorOfSlideItemsTitle:(HHSlideView *)slideView;
-
-- (UIColor *)colorOfHighlightedSlideItemsTitle:(HHSlideView *)slideView;
+@required
+- (NSArray *)childViewControllersInSlideView:(HHSlideView *)slideView;
 
 @end
 
-/**
- *  带滑块效果的分段选择视图
- */
 @interface HHSlideView : UIView
 
+- (instancetype)initWithItemsArray:(nonnull NSArray *)itemsArray;
+
 @property (weak, nonatomic) id<HHSlideViewDelegate> delegate;
-
-@property (assign, nonatomic, readonly) NSInteger numberOfSlideItems; /**< 组成单件数量 */
-
-@property (strong, nonatomic, readonly) NSArray *namesOfSlideItems;   /**< 各个单件的名字 */
-
-@property (strong, nonatomic, readonly) UIColor *colorOfSlider;       /**< 底部滑块的颜色 */
-
-@property (strong, nonatomic, readonly) UIColor *colorOfSlideView;    /**< 视图的整体颜色 */
-
-@property (strong, nonatomic, readonly) UIColor *colorOfSlideItemsTitle;   /**< 单件标题文本默认色 */
-
-@property (strong, nonatomic, readonly) UIColor *colorOfHighlightedSlideItemsTitle;  /**< 单件标题文本高亮色 */
+@property (weak, nonatomic) id<HHSlideViewDataSource> dataSource;
 
 @end
 
-
+NS_ASSUME_NONNULL_END
