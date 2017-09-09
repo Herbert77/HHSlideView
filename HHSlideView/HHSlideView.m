@@ -65,30 +65,54 @@
 #pragma mark - life cycle
 - (instancetype)initWithItemsArray:(nonnull NSArray *)itemsArray {
     
-    self = [super init];
+    self = [super initWithFrame:CGRectZero];
     
     if (self) {
         
-        _buttonsArray = [NSMutableArray new];
-        _controllerViewsArray = [NSMutableArray new];
-        _currentIndex = 0;
-        
-        [self setBackgroundColor:[UIColor grayColor]];
-        
-        [self addSubview:self.bar];
-        
-        [self createButtonsWithItemsArray:itemsArray];
-        
-        [self.bar addSubview:self.slider];
-        
-        [self addSubview:self.scrollView];
-        
-        [self.scrollView addSubview:self.containerView];
-        
-        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleDeviceOrientationDidChange:) name:UIDeviceOrientationDidChangeNotification object:nil];
+        [self initializeUserInterfaceWithItemArray:itemsArray];
     }
     
     return self;
+}
+
+- (instancetype)initWithCoder:(NSCoder *)aDecoder {
+    
+    self = [super initWithCoder:aDecoder];
+    
+    if (self) {
+        
+        [self initializeUserInterfaceWithItemArray:@[@"1", @"2", @"3", @"4"]];
+    }
+    
+    return self;
+}
+
+// Convenient Initializer
+- (instancetype)initWithFrame:(CGRect)frame {
+    
+    return [self initWithItemsArray:@[@"1",@"2",@"3",@"4"]];
+}
+
+
+- (void)initializeUserInterfaceWithItemArray:(NSArray *)itemsArray {
+    
+    _buttonsArray = [NSMutableArray new];
+    _controllerViewsArray = [NSMutableArray new];
+    _currentIndex = 0;
+    
+    [self setBackgroundColor:[UIColor grayColor]];
+    
+    [self addSubview:self.bar];
+    
+    [self createButtonsWithItemsArray:itemsArray];
+    
+    [self.bar addSubview:self.slider];
+    
+    [self addSubview:self.scrollView];
+    
+    [self.scrollView addSubview:self.containerView];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleDeviceOrientationDidChange:) name:UIDeviceOrientationDidChangeNotification object:nil];
 }
 
 - (void)layoutSubviews {

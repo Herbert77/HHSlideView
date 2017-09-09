@@ -26,7 +26,6 @@
     [super viewDidLoad];
     
     [self.view addSubview:self.slideView];
-    
 }
 
 - (void)viewDidLayoutSubviews {
