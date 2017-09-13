@@ -63,6 +63,7 @@
 }
 
 #pragma mark - life cycle
+// Designated Initializer
 - (instancetype)initWithItemsArray:(nonnull NSArray *)itemsArray {
     
     self = [super initWithFrame:CGRectZero];
